@@ -159,46 +159,4 @@ public class DirNode extends Entity {
         return null;
     }
 
-//    public Entity createNewEntity(String newEntityName, Entity.TYPE type) throws IOException {
-//        int tempNodeID = currentNodeIndex();
-//        File tempNewFile = new File(RELATIVE_PATH + "/" + tempNodeID + ".node");
-//        byte[] newEntityNameByteArray = newEntityName.getBytes();
-//        int newEntityNameByteLength = newEntityNameByteArray.length;
-//        Entity newEntity = null;
-//        File tempDirFile = new File(RELATIVE_PATH + "/" + this.id + ".node");
-//        BufferedOutputStream tempNodeOut = new BufferedOutputStream(new FileOutputStream(tempDirFile, true));
-//
-//        if (this.containsDir(newEntityName)) {
-//            System.out.println("duplicate entity name: " + newEntityName);
-//            return newEntity;
-//        }
-//        if (!tempNewFile.createNewFile()) {
-//            System.out.println("duplicate entity node: " + tempNodeID + ".node");
-//            tempNewFile.delete();
-//            return newEntity;
-//        }
-//
-//        switch (type) {
-//            case FILE: {
-//                tempNodeOut.write(0);
-//                newEntity = new FileNode(tempNodeID, newEntityName);
-//            } break;
-//            case DIR: {
-//                tempNodeOut.write(1);
-//                newEntity = new DirNode(tempNodeID, newEntityName);
-//            } break;
-//        }
-//        tempNodeOut.write((newEntityNameByteLength & 0xff0000) >> 16);
-//        tempNodeOut.write((newEntityNameByteLength & 0xff00) >> 8);
-//        tempNodeOut.write((newEntityNameByteLength & 0xff));
-//        tempNodeOut.write(newEntityNameByteArray, 0, newEntityNameByteLength);
-//        tempNodeOut.write((tempNodeID & 0xff000000) >> 24);
-//        tempNodeOut.write((tempNodeID & 0xff0000) >> 16);
-//        tempNodeOut.write((tempNodeID & 0xff00) >> 8);
-//        tempNodeOut.write((tempNodeID & 0xff));
-//        tempNodeOut.flush();
-//        tempNodeOut.close();
-//        return newEntity;
-//    }
-
 }

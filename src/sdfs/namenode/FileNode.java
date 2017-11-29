@@ -22,10 +22,6 @@ public class FileNode extends Entity implements Serializable {
         System.out.println("initial file node name: " + this.name);
     }
 
-//    public List<BlockInfo> getBlockInfos() {
-//        return blockInfos;
-//    }
-
     // fill block write
     public boolean writeToBlockInfosOnce(byte[] data, int endPos) {
         if (endPos > DataNode.BLOCK_SIZE) {

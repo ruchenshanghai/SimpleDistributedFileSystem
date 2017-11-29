@@ -6,7 +6,7 @@ import java.io.*;
 import java.net.URISyntaxException;
 
 public class NameNode implements INameNode {
-    
+
 
     // constructor
     public NameNode() {
@@ -141,6 +141,7 @@ public class NameNode implements INameNode {
         DirNode dirNode = (DirNode) createNewEntity(fileUri, Entity.TYPE.DIR);
         if (dirNode == null) {
             System.out.println("create directory error: " + fileUri);
+            throw new IOException();
         }
     }
 

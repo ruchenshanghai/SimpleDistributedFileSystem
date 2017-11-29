@@ -17,22 +17,17 @@ import java.net.URISyntaxException;
 
 public class SDFSOutputStream implements Closeable, Flushable {
     private FileNode fileNode;
-    private String fileUri;
     int bufferSize = DataNode.BLOCK_SIZE;
     int currentBufferPos = 0;
     byte[] buffer = new byte[bufferSize];
 
 
 
-    public SDFSOutputStream(String fileUri) {
-        try {
-            NameNode nameNode = new NameNode();
-            fileNode = nameNode.create(fileUri);
-            this.fileUri = fileUri;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
+    public SDFSOutputStream(String fileUri) throws Exception {
+        NameNode nameNode = new NameNode();
+        fileNode = nameNode.create(fileUri);
+        if (fileNode == null) {
+            throw new Exception();
         }
     }
 

@@ -13,13 +13,25 @@ import java.nio.file.FileAlreadyExistsException;
 public class Client implements ISimpleDistributedFileSystem {
     @Override
     public SDFSInputStream open(String fileUri) throws FileNotFoundException, IOException {
-        SDFSInputStream sdfsIn = new SDFSInputStream(fileUri);
+        SDFSInputStream sdfsIn = null;
+        try {
+            sdfsIn = new SDFSInputStream(fileUri);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new FileNotFoundException();
+        }
         return sdfsIn;
     }
 
     @Override
     public SDFSOutputStream create(String fileUri) throws FileAlreadyExistsException, IOException {
-        SDFSOutputStream sdfsOut = new SDFSOutputStream(fileUri);
+        SDFSOutputStream sdfsOut = null;
+        try {
+            sdfsOut = new SDFSOutputStream(fileUri);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new FileAlreadyExistsException("create file error");
+        }
         return sdfsOut;
     }
 
@@ -28,9 +40,10 @@ public class Client implements ISimpleDistributedFileSystem {
         try {
             NameNode nameNode = new NameNode();
             nameNode.mkdir(fileUri);
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println("mkdir error");
+            throw new FileAlreadyExistsException("mkdir error");
         }
     }
 }
