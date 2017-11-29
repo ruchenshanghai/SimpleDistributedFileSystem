@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/SimpleDistributedFileSystem.iml" filepath="$PROJECT_DIR$/.idea/modules/SimpleDistributedFileSystem.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SimpleDistributedFileSystem_test.iml" filepath="$PROJECT_DIR$/.idea/modules/SimpleDistributedFileSystem_test.iml" group="SimpleDistributedFileSystem" />
     </modules>
   </component>
 </project>

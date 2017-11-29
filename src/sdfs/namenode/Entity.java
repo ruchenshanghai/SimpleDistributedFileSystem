@@ -11,6 +11,16 @@ public class Entity {
     protected TYPE type;
     protected String name;
 
+    public Entity() {
+//        System.out.println("no argument Entity constructor");
+    }
+
+    public Entity(int id, TYPE type, String name) {
+        this.id = id;
+        this.type = type;
+        this.name = name;
+    }
+
     public int getId() {
         return id;
     }

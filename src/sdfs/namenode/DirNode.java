@@ -11,15 +11,13 @@ import java.util.List;
 
 public class DirNode extends Entity {
     boolean initialRes = false;
-
     private List<Entity> contents = new LinkedList<>();
 
     // initial the node directory
-    private static final String relativePath = "./data/node";
-
+    private static final String RELATIVE_PATH = "./data/node";
     static {
-        File tempNodeDir = new File(relativePath);
-        File tempRootNode = new File(relativePath + "/0.node");
+        File tempNodeDir = new File(RELATIVE_PATH);
+        File tempRootNode = new File(RELATIVE_PATH + "/0.node");
         if (!tempNodeDir.isDirectory() || !tempRootNode.isFile()) {
             // need create directory
             boolean createDirRes = tempNodeDir.mkdirs();
@@ -35,21 +33,21 @@ public class DirNode extends Entity {
 
 
 
-    public DirNode(int id) throws IOException {
-        this.id = id;
-        this.type = TYPE.DIR;
-    }
+//    public DirNode(int id) throws IOException {
+//        this.id = id;
+//        this.type = TYPE.DIR;
+//    }
 
     public DirNode(int id, String directoryName) throws IOException {
-        this.id = id;
-        this.type = TYPE.DIR;
-        this.name = directoryName;
+        super(id, TYPE.DIR, directoryName);
     }
 
 
     public void initialContents() throws IOException {
+        // get info from disk
+        System.out.println("initial directory node name: " + this.name);
         try {
-            File dirFile = new File(relativePath + "/" + this.id + ".node");
+            File dirFile = new File(RELATIVE_PATH + "/" + this.id + ".node");
             BufferedInputStream dirInputStream = new BufferedInputStream(new FileInputStream(dirFile));
 
             byte tempByte;
@@ -70,11 +68,11 @@ public class DirNode extends Entity {
                 nameByteArray = new byte[nodeNameLength];
 
                 int readRes = dirInputStream.read(nameByteArray, 0, nodeNameLength);
-                System.out.println("read node name length: " + readRes);
                 if (readRes == -1) {
                     return;
                 }
                 nodeName = new String(nameByteArray);
+                System.out.println("read node name: " + nodeName);
 
                 tempByte = (byte) dirInputStream.read();
                 nodeID = ((tempByte << 24) & 0xff000000) | nodeID;
@@ -104,7 +102,7 @@ public class DirNode extends Entity {
 
     }
 
-    public boolean containsDir(String directoryName) {
+    private boolean containsDir(String directoryName) {
         Iterator<Entity> contentIter = contents.iterator();
         while (contentIter.hasNext()) {
             Entity tempEntity = contentIter.next();
@@ -113,6 +111,11 @@ public class DirNode extends Entity {
             }
         }
         return false;
+    }
+
+    private static int currentNodeIndex() {
+        File tempDirectory = new File(RELATIVE_PATH);
+        return tempDirectory.list().length;
     }
 
     public DirNode checkOutDir(String directoryName) throws IOException {
@@ -126,31 +129,46 @@ public class DirNode extends Entity {
         return null;
     }
 
-    private static int currentNodeIndex() {
-        File tempDirectory = new File(relativePath);
-        return tempDirectory.list().length;
+    public FileNode checkOutFile(String fileName) {
+        Iterator<Entity> contentIter = contents.iterator();
+        while (contentIter.hasNext()) {
+            Entity tempEntry = contentIter.next();
+            if (tempEntry.type == TYPE.FILE && tempEntry.name.equals(fileName)) {
+                return new FileNode(tempEntry.id, tempEntry.name);
+            }
+        }
+        return null;
     }
 
-    public static boolean createNewEntity(DirNode dirNode, String newEntityName, Entity.TYPE type) throws IOException {
+    public Entity createNewEntity(String newEntityName, Entity.TYPE type) throws IOException {
         int tempNodeID = currentNodeIndex();
-        File tempNewFile = new File(relativePath + "/" + tempNodeID + ".node");
+        File tempNewFile = new File(RELATIVE_PATH + "/" + tempNodeID + ".node");
+        byte[] newEntityNameByteArray = newEntityName.getBytes();
+        int newEntityNameByteLength = newEntityNameByteArray.length;
+        Entity newEntity = null;
+        File tempDirFile = new File(RELATIVE_PATH + "/" + this.id + ".node");
+        BufferedOutputStream tempNodeOut = new BufferedOutputStream(new FileOutputStream(tempDirFile, true));
+
+        if (this.containsDir(newEntityName)) {
+            System.out.println("duplicate entity name: " + newEntityName);
+            return newEntity;
+        }
         if (!tempNewFile.createNewFile()) {
+            System.out.println("duplicate entity node: " + tempNodeID + ".node");
             tempNewFile.delete();
-            return false;
+            return newEntity;
         }
 
-        File tempDirFile = new File(relativePath + "/" + dirNode.id + ".node");
-        BufferedOutputStream tempNodeOut = new BufferedOutputStream(new FileOutputStream(tempDirFile, true));
         switch (type) {
             case FILE: {
                 tempNodeOut.write(0);
+                newEntity = new FileNode(tempNodeID, newEntityName);
             } break;
             case DIR: {
                 tempNodeOut.write(1);
+                newEntity = new DirNode(tempNodeID, newEntityName);
             } break;
         }
-        byte[] newEntityNameByteArray = newEntityName.getBytes();
-        int newEntityNameByteLength = newEntityNameByteArray.length;
         tempNodeOut.write((newEntityNameByteLength & 0xff0000) >> 16);
         tempNodeOut.write((newEntityNameByteLength & 0xff00) >> 8);
         tempNodeOut.write((newEntityNameByteLength & 0xff));
@@ -161,7 +179,8 @@ public class DirNode extends Entity {
         tempNodeOut.write((tempNodeID & 0xff));
         tempNodeOut.flush();
         tempNodeOut.close();
-        return true;
+        return newEntity;
     }
+
 
 }
