@@ -13,9 +13,6 @@ public class DirNode extends Entity {
     boolean initialRes = false;
     private List<Entity> contents = new LinkedList<>();
 
-    public static String getRelativePath() {
-        return RELATIVE_PATH;
-    }
 
     // initial the node directory
     private static final String RELATIVE_PATH = "./data/node";
@@ -115,6 +112,10 @@ public class DirNode extends Entity {
             }
         }
         return false;
+    }
+
+    public static String getRelativePath() {
+        return RELATIVE_PATH;
     }
 
     public static int currentNodeIndex() {

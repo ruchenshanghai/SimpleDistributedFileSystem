@@ -131,18 +131,18 @@ public class NameNode implements INameNode {
 
 
     @Override
-    public void close(String fileUri) throws IOException, URISyntaxException {
-        // no use
-
-    }
-
-    @Override
     public void mkdir(String fileUri) throws IOException, URISyntaxException {
         DirNode dirNode = (DirNode) createNewEntity(fileUri, Entity.TYPE.DIR);
         if (dirNode == null) {
             System.out.println("create directory error: " + fileUri);
             throw new IOException();
         }
+    }
+
+    @Override
+    public void close(String fileUri) throws IOException, URISyntaxException {
+        // no use
+
     }
 
     @Override

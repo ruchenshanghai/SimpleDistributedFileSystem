@@ -44,6 +44,9 @@ public class FileNode extends Entity implements Serializable {
         return true;
     }
 
+    // read from block
+//    public boolean readFromBlockInfos(byte[] target, st)
+
 }
 
 class BlockInfo implements Serializable {

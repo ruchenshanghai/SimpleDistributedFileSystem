@@ -13,6 +13,7 @@ import java.net.URISyntaxException;
 
 public class SDFSInputStream implements Closeable {
     private FileNode fileNode;
+    private int currentPos = 0;
 
     public SDFSInputStream(String fileUri) throws Exception {
         NameNode nameNode = new NameNode();
