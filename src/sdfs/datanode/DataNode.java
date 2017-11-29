@@ -1,8 +1,6 @@
 package sdfs.datanode;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.FileAlreadyExistsException;
 
 public class DataNode implements IDataNode {
@@ -15,7 +13,6 @@ public class DataNode implements IDataNode {
             System.out.println("create block directory: " + createRes);
         }
     }
-    private static final int BLOCK_SIZE = 128*1024;
 
     public DataNode() {
         System.out.println("initial data node success!");
@@ -24,26 +21,46 @@ public class DataNode implements IDataNode {
     @Override
     public int read(int blockNumber, int offset, int size, byte[] b) throws IndexOutOfBoundsException, FileNotFoundException, IOException {
         return 0;
+
     }
 
     @Override
     public void write(int blockNumber, int offset, int size, byte[] b) throws IndexOutOfBoundsException, FileAlreadyExistsException, IOException {
-
+        File tempFile = new File(RELATIVE_PATH + "/" + blockNumber + ".block");
+        BufferedOutputStream tempOut = new BufferedOutputStream(new FileOutputStream(tempFile));
+        if (!tempFile.isFile()) {
+            System.out.println("write to not exist: " + blockNumber + ".block" + " error");
+            return;
+        }
+        if (offset > 0) {
+            // get previous data
+            BufferedInputStream tempIn = new BufferedInputStream(new FileInputStream(tempFile));
+            byte[] tempInArray = new byte[offset];
+            int tempReadCount = tempIn.read(tempInArray, 0, offset);
+            System.out.println("get previous count: " + tempReadCount);
+            tempOut.write(tempInArray, 0, offset);
+        }
+        if (offset + size <= BLOCK_SIZE) {
+            tempOut.write(b, 0, size);
+        }
+        tempOut.flush();
+        tempOut.close();
     }
 
-    public static int currentBlockIndex() {
+    private static int currentBlockIndex() {
         File tempDirectory = new File(RELATIVE_PATH);
         return tempDirectory.list().length + 1;
     }
 
-    public boolean createNewBlock() throws IOException {
+    public static int createNewBlock() throws IOException {
         int tempBlockID = currentBlockIndex();
         File tempNewFile = new File(RELATIVE_PATH + "/" + tempBlockID + ".block");
         if (!tempNewFile.createNewFile()) {
             System.out.println("duplicate block file: " + tempBlockID + ".block");
             tempNewFile.delete();
-            return false;
+            return 0;
         }
-        return true;
+        System.out.println("create block: " + tempBlockID + ".block");
+        return tempBlockID;
     }
 }

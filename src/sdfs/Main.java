@@ -1,56 +1,34 @@
 package sdfs;
 
+import sdfs.client.Client;
 import sdfs.datanode.DataNode;
 import sdfs.namenode.DirNode;
 import sdfs.namenode.Entity;
 import sdfs.namenode.FileNode;
 import sdfs.namenode.NameNode;
+import sdfs.utils.SDFSOutputStream;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.URISyntaxException;
 
 public class Main {
     public static void main(String[] args) throws IOException, URISyntaxException {
 
-//        FileNode testObject = new FileNode(110, "fileName123321");
-//        System.out.println(testObject.getID());
-//        System.out.println(testObject.getName());
-//        File testFile = new File("./fileNode");
-//        try {
-//            testFile.createNewFile();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        FileOutputStream fos = new FileOutputStream(testFile);
-//        ObjectOutputStream oos = new ObjectOutputStream(fos);
-//        oos.writeObject(testObject);
-//        oos.flush();
-//        oos.close();
-//        fos.close();
+//        Client testClient = new Client();
+//        testClient.mkdir("dir1");
+//        testClient.mkdir("dir2");
+//        SDFSOutputStream testOut = testClient.create("dir1/file11");
 //
-//        testFile = new File("./fileNode");
-//        FileInputStream fis = new FileInputStream(testFile);
-//        ObjectInputStream ois = new ObjectInputStream(fis);
-//        try {
-//            FileNode testNode = (FileNode)(ois.readObject());
-//            System.out.println(testNode.getID());
-//            System.out.println(testNode.getName());
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
+//        byte[] testData = new byte[128 * 1024 + 5];
+//        for (int i = 0; i < testData.length; i++) {
+//            testData[i] = (byte) (Math.random() * 255);
 //        }
+//        testOut.write(testData);
+//        testOut.close();
 
-//        NameNode nameNode = new NameNode();
-//        nameNode.mkdir("dir1");
-//        nameNode.mkdir("dir2");
-//        nameNode.mkdir("dir1/dir11");
-//        FileNode newNode = nameNode.create("dir1/file11");
-//        System.out.println(newNode);
-
-//        NameNode nameNode = new NameNode();
-//        FileNode newNode = nameNode.open("dir1/file11");
-//        System.out.println(newNode);
-
-        DataNode test = new DataNode();
-        System.out.println(test.createNewBlock());
+        NameNode nameNode = new NameNode();
+        FileNode fileNode = nameNode.open("dir1/file11");
+        System.out.println(fileNode.getName());
     }
 }

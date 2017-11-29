@@ -13,6 +13,10 @@ public class DirNode extends Entity {
     boolean initialRes = false;
     private List<Entity> contents = new LinkedList<>();
 
+    public static String getRelativePath() {
+        return RELATIVE_PATH;
+    }
+
     // initial the node directory
     private static final String RELATIVE_PATH = "./data/node";
     static {
@@ -33,10 +37,10 @@ public class DirNode extends Entity {
 
 
 
-//    public DirNode(int id) throws IOException {
-//        this.id = id;
-//        this.type = TYPE.DIR;
-//    }
+    public DirNode(int id) throws IOException {
+        this.id = id;
+        this.type = TYPE.DIR;
+    }
 
     public DirNode(int id, String directoryName) throws IOException {
         super(id, TYPE.DIR, directoryName);
@@ -102,7 +106,7 @@ public class DirNode extends Entity {
 
     }
 
-    private boolean containsDir(String directoryName) {
+    public boolean containsDir(String directoryName) {
         Iterator<Entity> contentIter = contents.iterator();
         while (contentIter.hasNext()) {
             Entity tempEntity = contentIter.next();
@@ -113,7 +117,7 @@ public class DirNode extends Entity {
         return false;
     }
 
-    private static int currentNodeIndex() {
+    public static int currentNodeIndex() {
         File tempDirectory = new File(RELATIVE_PATH);
         return tempDirectory.list().length;
     }
@@ -134,53 +138,67 @@ public class DirNode extends Entity {
         while (contentIter.hasNext()) {
             Entity tempEntry = contentIter.next();
             if (tempEntry.type == TYPE.FILE && tempEntry.name.equals(fileName)) {
-                return new FileNode(tempEntry.id, tempEntry.name);
+                File tempFile = new File(RELATIVE_PATH + "/" + tempEntry.id + ".node");
+                if (!tempFile.isFile()) {
+                    return null;
+                }
+                try {
+                    FileInputStream tempIn = new FileInputStream(tempFile);
+                    ObjectInputStream objIn = new ObjectInputStream(tempIn);
+                    FileNode tempFileNode = (FileNode) objIn.readObject();
+                    tempFileNode.setId(tempEntry.id);
+                    tempFileNode.setName(tempEntry.name);
+                    tempFileNode.setType(TYPE.FILE);
+                    return tempFileNode;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
             }
         }
         return null;
     }
 
-    public Entity createNewEntity(String newEntityName, Entity.TYPE type) throws IOException {
-        int tempNodeID = currentNodeIndex();
-        File tempNewFile = new File(RELATIVE_PATH + "/" + tempNodeID + ".node");
-        byte[] newEntityNameByteArray = newEntityName.getBytes();
-        int newEntityNameByteLength = newEntityNameByteArray.length;
-        Entity newEntity = null;
-        File tempDirFile = new File(RELATIVE_PATH + "/" + this.id + ".node");
-        BufferedOutputStream tempNodeOut = new BufferedOutputStream(new FileOutputStream(tempDirFile, true));
-
-        if (this.containsDir(newEntityName)) {
-            System.out.println("duplicate entity name: " + newEntityName);
-            return newEntity;
-        }
-        if (!tempNewFile.createNewFile()) {
-            System.out.println("duplicate entity node: " + tempNodeID + ".node");
-            tempNewFile.delete();
-            return newEntity;
-        }
-
-        switch (type) {
-            case FILE: {
-                tempNodeOut.write(0);
-                newEntity = new FileNode(tempNodeID, newEntityName);
-            } break;
-            case DIR: {
-                tempNodeOut.write(1);
-                newEntity = new DirNode(tempNodeID, newEntityName);
-            } break;
-        }
-        tempNodeOut.write((newEntityNameByteLength & 0xff0000) >> 16);
-        tempNodeOut.write((newEntityNameByteLength & 0xff00) >> 8);
-        tempNodeOut.write((newEntityNameByteLength & 0xff));
-        tempNodeOut.write(newEntityNameByteArray, 0, newEntityNameByteLength);
-        tempNodeOut.write((tempNodeID & 0xff000000) >> 24);
-        tempNodeOut.write((tempNodeID & 0xff0000) >> 16);
-        tempNodeOut.write((tempNodeID & 0xff00) >> 8);
-        tempNodeOut.write((tempNodeID & 0xff));
-        tempNodeOut.flush();
-        tempNodeOut.close();
-        return newEntity;
-    }
-
+//    public Entity createNewEntity(String newEntityName, Entity.TYPE type) throws IOException {
+//        int tempNodeID = currentNodeIndex();
+//        File tempNewFile = new File(RELATIVE_PATH + "/" + tempNodeID + ".node");
+//        byte[] newEntityNameByteArray = newEntityName.getBytes();
+//        int newEntityNameByteLength = newEntityNameByteArray.length;
+//        Entity newEntity = null;
+//        File tempDirFile = new File(RELATIVE_PATH + "/" + this.id + ".node");
+//        BufferedOutputStream tempNodeOut = new BufferedOutputStream(new FileOutputStream(tempDirFile, true));
+//
+//        if (this.containsDir(newEntityName)) {
+//            System.out.println("duplicate entity name: " + newEntityName);
+//            return newEntity;
+//        }
+//        if (!tempNewFile.createNewFile()) {
+//            System.out.println("duplicate entity node: " + tempNodeID + ".node");
+//            tempNewFile.delete();
+//            return newEntity;
+//        }
+//
+//        switch (type) {
+//            case FILE: {
+//                tempNodeOut.write(0);
+//                newEntity = new FileNode(tempNodeID, newEntityName);
+//            } break;
+//            case DIR: {
+//                tempNodeOut.write(1);
+//                newEntity = new DirNode(tempNodeID, newEntityName);
+//            } break;
+//        }
+//        tempNodeOut.write((newEntityNameByteLength & 0xff0000) >> 16);
+//        tempNodeOut.write((newEntityNameByteLength & 0xff00) >> 8);
+//        tempNodeOut.write((newEntityNameByteLength & 0xff));
+//        tempNodeOut.write(newEntityNameByteArray, 0, newEntityNameByteLength);
+//        tempNodeOut.write((tempNodeID & 0xff000000) >> 24);
+//        tempNodeOut.write((tempNodeID & 0xff0000) >> 16);
+//        tempNodeOut.write((tempNodeID & 0xff00) >> 8);
+//        tempNodeOut.write((tempNodeID & 0xff));
+//        tempNodeOut.flush();
+//        tempNodeOut.close();
+//        return newEntity;
+//    }
 
 }

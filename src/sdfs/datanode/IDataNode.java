@@ -12,6 +12,7 @@ public interface IDataNode {
 
     //number of bytes in one block file
     final int blockSize = 128 * 1024;
+    static final int BLOCK_SIZE = 128 * 1024;
 
     /**
      * Read data from a block.
