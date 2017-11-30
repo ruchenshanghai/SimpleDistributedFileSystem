@@ -16,7 +16,7 @@ public class SDFSInputStream implements Closeable {
     private int currentPos = 0;
 
     public SDFSInputStream(String fileUri) throws Exception {
-        NameNode nameNode = new NameNode();
+        NameNode nameNode = NameNode.getSingleNameNodeInstance();
         fileNode = nameNode.open(fileUri);
         if (fileNode == null) {
             throw new Exception();
@@ -26,6 +26,11 @@ public class SDFSInputStream implements Closeable {
 
     public int read(byte[] b) throws IOException {
         //todo your code here
+        if (currentPos >= fileNode.getTotalSize()) {
+            throw new IOException();
+        }
+
+
 
         return 0;
     }

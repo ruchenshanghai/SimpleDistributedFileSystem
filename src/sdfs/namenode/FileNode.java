@@ -9,13 +9,13 @@ import sdfs.utils.LocatedBlock;
 
 import java.io.*;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileNode extends Entity implements Serializable {
     private static final long serialVersionUID = -5007570814999866661L;
     private final List<BlockInfo> blockInfos = new ArrayList<>();
+    private int totalSize = 0;
 
     public FileNode(int id, String fileName) {
         super(id, TYPE.FILE, fileName);
@@ -41,11 +41,27 @@ public class FileNode extends Entity implements Serializable {
             System.out.println("write to block info error");
             return false;
         }
+        totalSize += endPos;
         return true;
     }
 
-    // read from block
-//    public boolean readFromBlockInfos(byte[] target, st)
+    public int getTotalSize() {
+        return totalSize;
+    }
+// read from block
+    public int readFromBlockInfos(byte[] target, int startPos) {
+        int blockInfoIndex = startPos / DataNode.BLOCK_SIZE;
+        int blockInfoPos = startPos % DataNode.BLOCK_SIZE;
+        int readCount = 0;
+//        while (readCount < target.length && blockInfoIndex < blockInfos.size()) {
+//            while (readCount < target.length && blockInfoPos < DataNode.BLOCK_SIZE) {
+//                target[readCount]
+//            }
+//        }
+
+
+        return 0;
+    }
 
 }
 
@@ -83,6 +99,15 @@ class BlockInfo implements Serializable {
             }
         }
         return true;
+    }
+
+    public int readFromDataNodeOnce(byte[] target, int targetPos, int blockPos) {
+        if (targetPos >= target.length) {
+            return 0;
+        }
+
+
+        return 0;
     }
 
 

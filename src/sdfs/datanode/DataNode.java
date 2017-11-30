@@ -1,5 +1,7 @@
 package sdfs.datanode;
 
+import sdfs.namenode.FileNode;
+
 import java.io.*;
 import java.nio.file.FileAlreadyExistsException;
 
@@ -20,19 +22,37 @@ public class DataNode implements IDataNode {
 
     @Override
     public int read(int blockNumber, int offset, int size, byte[] b) throws IndexOutOfBoundsException, FileNotFoundException, IOException {
+        File tempFile = new File(RELATIVE_PATH + "/" + blockNumber + ".block");
+        if (!tempFile.isFile()) {
+            System.out.println("write to not exist: " + blockNumber + ".block" + " error");
+            throw new FileNotFoundException();
+        }
+        BufferedInputStream tempIn = new BufferedInputStream(new FileInputStream(tempFile));
+        if (offset > 0 && offset < BLOCK_SIZE) {
+//            for (int i = 0; i < )
+        }
+
+        if (offset + size <= BLOCK_SIZE) {
+
+        } else {
+
+        }
+
         return 0;
 
     }
 
+
+    // create file outside?
     @Override
     public void write(int blockNumber, int offset, int size, byte[] b) throws IndexOutOfBoundsException, FileAlreadyExistsException, IOException {
         File tempFile = new File(RELATIVE_PATH + "/" + blockNumber + ".block");
-        BufferedOutputStream tempOut = new BufferedOutputStream(new FileOutputStream(tempFile));
         if (!tempFile.isFile()) {
             System.out.println("write to not exist: " + blockNumber + ".block" + " error");
             return;
         }
-        if (offset > 0) {
+        BufferedOutputStream tempOut = new BufferedOutputStream(new FileOutputStream(tempFile));
+        if (offset > 0 && offset < BLOCK_SIZE) {
             // get previous data
             BufferedInputStream tempIn = new BufferedInputStream(new FileInputStream(tempFile));
             byte[] tempInArray = new byte[offset];
@@ -42,9 +62,11 @@ public class DataNode implements IDataNode {
         }
         if (offset + size <= BLOCK_SIZE) {
             tempOut.write(b, 0, size);
+            tempOut.flush();
+            tempOut.close();
+        } else {
+            throw new IndexOutOfBoundsException();
         }
-        tempOut.flush();
-        tempOut.close();
     }
 
     private static int currentBlockIndex() {

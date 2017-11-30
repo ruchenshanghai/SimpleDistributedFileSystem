@@ -7,6 +7,9 @@ public class Entity {
         FILE,DIR
     }
 
+    private static final int NOT_EXIST_ID = -1;
+    // id: -1 for not save to disk
+
     protected int id;
     protected TYPE type;
     protected String name;
@@ -19,6 +22,10 @@ public class Entity {
         this.id = id;
         this.type = type;
         this.name = name;
+    }
+
+    public static int getNotExistId() {
+        return NOT_EXIST_ID;
     }
 
     public int getId() {

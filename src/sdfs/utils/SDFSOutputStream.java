@@ -24,7 +24,7 @@ public class SDFSOutputStream implements Closeable, Flushable {
 
 
     public SDFSOutputStream(String fileUri) throws Exception {
-        NameNode nameNode = new NameNode();
+        NameNode nameNode = NameNode.getSingleNameNodeInstance();
         fileNode = nameNode.create(fileUri);
         if (fileNode == null) {
             throw new Exception();
@@ -77,7 +77,7 @@ public class SDFSOutputStream implements Closeable, Flushable {
             currentBufferPos = 0;
         }
 
-        NameNode nameNode = new NameNode();
+        NameNode nameNode = NameNode.getSingleNameNodeInstance();
         try {
             nameNode.closeFileNode(fileNode);
         } catch (Exception e) {

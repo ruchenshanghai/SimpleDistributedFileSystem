@@ -5,6 +5,7 @@
 package sdfs.namenode;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,7 +14,7 @@ public class DirNode extends Entity {
     boolean initialRes = false;
     private List<Entity> contents = new LinkedList<>();
 
-
+    private static final int ROOT_ID = 0;
     // initial the node directory
     private static final String RELATIVE_PATH = "./data/node";
     static {
@@ -114,6 +115,17 @@ public class DirNode extends Entity {
         return false;
     }
 
+    public boolean containsFile(String fileName) {
+        Iterator<Entity> contentIter = contents.iterator();
+        while (contentIter.hasNext()) {
+            Entity tempEntity = contentIter.next();
+            if (tempEntity.name.equals(fileName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static String getRelativePath() {
         return RELATIVE_PATH;
     }
@@ -121,6 +133,33 @@ public class DirNode extends Entity {
     public static int currentNodeIndex() {
         File tempDirectory = new File(RELATIVE_PATH);
         return tempDirectory.list().length;
+    }
+
+    // array: 0-name, 1-parent id
+    public static String[] createNewDirectory(String fileUri) throws IOException, URISyntaxException {
+        // get directory and name
+        String[] pathArray = fileUri.split("/");
+        String tempDirectoryName = "";
+        DirNode dirNode = new DirNode(ROOT_ID, tempDirectoryName);
+        dirNode.initialContents();
+        if (!dirNode.initialRes) {
+            throw new URISyntaxException(fileUri, "file uri error");
+        }
+        for (int i = 0; i < pathArray.length - 1; i++) {
+            dirNode = dirNode.checkOutDir(pathArray[i]);
+            if (dirNode == null) {
+                System.out.println("create directory error");
+                throw new IOException();
+            }
+            dirNode.initialContents();
+        }
+        String newDirectoryName = pathArray[pathArray.length - 1];
+        System.out.println("new directory name: " + newDirectoryName);
+        if (newDirectoryName.equals("") || dirNode.containsDir(newDirectoryName)) {
+            System.out.println("directory name error");
+            throw new URISyntaxException(fileUri, "file uri error");
+        }
+        return new String[]{newDirectoryName, String.valueOf(dirNode.getId())};
     }
 
     public DirNode checkOutDir(String directoryName) throws IOException {

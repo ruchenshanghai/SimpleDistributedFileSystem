@@ -38,7 +38,7 @@ public class Client implements ISimpleDistributedFileSystem {
     @Override
     public void mkdir(String fileUri) throws FileAlreadyExistsException, IOException {
         try {
-            NameNode nameNode = new NameNode();
+            NameNode nameNode = NameNode.getSingleNameNodeInstance();
             nameNode.mkdir(fileUri);
         } catch (Exception e) {
             e.printStackTrace();
