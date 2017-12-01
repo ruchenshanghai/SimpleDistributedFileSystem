@@ -1,11 +1,20 @@
 package sdfs.namenode;
 
+import sdfs.datanode.DataNode;
+
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SystemTree {
     private SystemNode rootDirNode = null;
+    static {
+        try {
+            Class.forName("sdfs.namenode.DirNode");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
     private static SystemTree systemTree = new SystemTree();
 
     private SystemTree() {
@@ -20,17 +29,42 @@ public class SystemTree {
         return systemTree;
     }
 
-    public String parseFileUriOut(String fileUri) {
+//    public String parseFileUriOut(String fileUri) {
+//        String[] pathArray = fileUri.split("/");
+//        SystemNode tempNode = rootDirNode;
+//        for (int i = 0; i < pathArray.length - 1; i++) {
+//            tempNode = tempNode.checkOutChild(pathArray[i]);
+//            if (tempNode == null) {
+//                System.out.println("open file error");
+//                return null;
+//            }
+//        }
+//        return pathArray[pathArray.length - 1];
+//    }
+
+    public boolean mkdir(String fileUri, int tempID) {
         String[] pathArray = fileUri.split("/");
-        SystemNode tempNode = rootDirNode;
+        SystemNode tempDirNode = rootDirNode;
         for (int i = 0; i < pathArray.length - 1; i++) {
-            tempNode = tempNode.checkOutChild(pathArray[i]);
-            if (tempNode == null) {
+            tempDirNode = tempDirNode.checkOutChild(pathArray[i]);
+            if (tempDirNode == null) {
                 System.out.println("open file error");
-                return null;
+                return false;
             }
         }
-        return pathArray[pathArray.length - 1];
+        if (tempDirNode.getType() == SystemNode.TYPE.FILE) {
+            return false;
+        }
+        String tempNewDirectoryName = pathArray[pathArray.length - 1];
+        SystemNode tempFileNode = null;
+        try {
+            tempFileNode = new SystemNode(tempID, tempNewDirectoryName, SystemNode.TYPE.DIR);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        tempDirNode.addChildNode(tempFileNode);
+        return true;
     }
 
     public SystemNode createFileUri(String fileUri) throws IOException {
@@ -62,7 +96,11 @@ public class SystemTree {
                 return null;
             }
         }
-        return tempNode;
+        if (tempNode.getType() == SystemNode.TYPE.FILE) {
+            return tempNode;
+        } else {
+            return null;
+        }
     }
 
     public static void main(String[] args) {
@@ -96,9 +134,11 @@ class SystemNode {
         this.type = type;
         if (type == TYPE.DIR) {
             childContents = new HashMap<>();
-            boolean initialRes = initialDirNode();
-            if (!initialRes) {
-                throw new IOException();
+            if (this.ID != Entity.getNotExistId()) {
+                boolean initialRes = initialDirNode();
+                if (!initialRes) {
+                    throw new IOException();
+                }
             }
         }
     }

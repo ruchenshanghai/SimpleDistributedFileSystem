@@ -25,14 +25,18 @@ public class NameNode implements INameNode {
     @Override
     public FileNode open(String fileUri) throws IOException, URISyntaxException {
         SystemNode targetNode = singleSystemTree.fetchFileOut(fileUri);
-        FileNode targetFile = new FileNode(targetNode.getID(), targetNode.getName());
         if (targetNode == null) {
+            throw new URISyntaxException(fileUri, "file uri error");
+        }
+        FileInputStream fileIn = new FileInputStream(new File(DirNode.getRelativePath() + "/" + targetNode.getID() + ".node"));
+        ObjectInputStream objIn = new ObjectInputStream(fileIn);
+        try {
+            FileNode targetFile = (FileNode) objIn.readObject();
+            return targetFile;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
             throw new IOException();
         }
-        if (!changedFileMap.containsKey(fileUri)) {
-            changedFileMap.put(fileUri, targetFile);
-        }
-        return targetFile;
     }
 
     @Override
@@ -78,6 +82,11 @@ public class NameNode implements INameNode {
         tempDirOut.write((tempNodeID & 0xff));
         tempDirOut.flush();
         tempDirOut.close();
+
+        boolean mkdirRes = singleSystemTree.mkdir(fileUri, tempNodeID);
+        if (!mkdirRes) {
+            return;
+        }
     }
 
     @Override
@@ -95,7 +104,7 @@ public class NameNode implements INameNode {
 
                 File tempDirFile = new File(DirNode.getRelativePath() + "/" + targetLeafNode.getParentNode().getID() + ".node");
                 File tempNewFile = new File(DirNode.getRelativePath() + "/" + tempNewFileNodeID + ".node");
-                DirNode tempDirNode = new DirNode(targetLeafNode.getParentNode().getID());
+                DirNode tempDirNode = new DirNode(targetLeafNode.getParentNode().getID(), targetLeafNode.getParentNode().getName());
                 tempDirNode.initialContents();
 
                 if ((!tempDirFile.isFile()) || tempDirNode.containsFile(tempNewFileName) || tempNewFile.isFile()) {

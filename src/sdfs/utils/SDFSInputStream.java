@@ -5,6 +5,7 @@
 package sdfs.utils;
 
 import sdfs.datanode.DataNode;
+import sdfs.namenode.BlockInfo;
 import sdfs.namenode.FileNode;
 import sdfs.namenode.NameNode;
 
@@ -31,35 +32,70 @@ public class SDFSInputStream implements Closeable {
             throw new IOException();
         }
         int leftBlockSize = fileNode.getTotalSize();
-        int leftArraySize = b.length;
+        int readCount = 0;
+        int targetLength = b.length;
+
         int blockInfoIndex = 0;
+        int blockInfoOffset = 0;
         int blockInfoLength = fileNode.getBlockInfoLength();
-        while (leftArraySize > 0 && leftBlockSize > 0 && blockInfoIndex < blockInfoLength) {
+        // initial by currentPos
+        blockInfoIndex = currentPos / DataNode.BLOCK_SIZE;
+        blockInfoOffset = currentPos % DataNode.BLOCK_SIZE;
+
+        while (readCount < targetLength && leftBlockSize > 0 && blockInfoIndex < blockInfoLength) {
             byte[] tempData;
-            if (leftBlockSize >= DataNode.BLOCK_SIZE && leftArraySize >= DataNode.BLOCK_SIZE) {
+            if (leftBlockSize >= DataNode.BLOCK_SIZE && (targetLength - readCount) >= DataNode.BLOCK_SIZE) {
                 tempData = new byte[DataNode.BLOCK_SIZE];
-
+                BlockInfo tempBlockInfo = fileNode.getBlockInfoByIndex(blockInfoIndex);
+                int tempReadCount = tempBlockInfo.readFromDataNodeOnce(tempData, blockInfoOffset, DataNode.BLOCK_SIZE);
+                System.arraycopy(tempData, 0, b, readCount, tempReadCount);
+                readCount += tempReadCount;
+                leftBlockSize -= tempReadCount;
+            } else if (leftBlockSize < DataNode.BLOCK_SIZE) {
+                if ((targetLength - readCount) >= leftBlockSize) {
+                    // leftBlockSize <= (targetLength - readCount), leftBlockSize < DataNode.BLOCK_SIZE
+                    tempData = new byte[leftBlockSize];
+                    BlockInfo tempBlockInfo = fileNode.getBlockInfoByIndex(blockInfoIndex);
+                    int tempReadCount = tempBlockInfo.readFromDataNodeOnce(tempData, blockInfoOffset, leftBlockSize);
+                    System.arraycopy(tempData, 0, b, readCount, tempReadCount);
+                    readCount += tempReadCount;
+                    leftBlockSize -= tempReadCount;
+                } else {
+                    // (targetLength - readCount) < leftBlockSize < DataNode.BLOCK_SIZE
+                    tempData = new byte[(targetLength - readCount)];
+                    BlockInfo tempBlockInfo = fileNode.getBlockInfoByIndex(blockInfoIndex);
+                    int tempReadCount = tempBlockInfo.readFromDataNodeOnce(tempData, blockInfoOffset, (targetLength - readCount));
+                    System.arraycopy(tempData, 0, b, readCount, tempReadCount);
+                    readCount += tempReadCount;
+                    leftBlockSize -= tempReadCount;
+                }
+            } else {
+                // leftBlockSize >= DataNode.BLOCK_SIZE > (targetLength - readCount)
+                tempData = new byte[(targetLength - readCount)];
+                BlockInfo tempBlockInfo = fileNode.getBlockInfoByIndex(blockInfoIndex);
+                int tempReadCount = tempBlockInfo.readFromDataNodeOnce(tempData, blockInfoOffset, (targetLength - readCount));
+                System.arraycopy(tempData, 0, b, readCount, tempReadCount);
+                readCount += tempReadCount;
+                leftBlockSize -= tempReadCount;
             }
+            blockInfoOffset = 0;
+            blockInfoIndex++;
         }
-        for (int dataIndex = 0; dataIndex < b.length && leftBlockSize > 0; dataIndex++) {
-            if (leftBlockSize >= DataNode.BLOCK_SIZE && leftArraySize >= DataNode.BLOCK_SIZE) {
-
-            }
-        }
-
-
-
-        return 0;
+        currentPos += readCount;
+        return readCount;
     }
 
     @Override
     public void close() throws IOException {
         //todo your code here
-
+        currentPos = 0;
     }
 
     public void seek(int newPos) throws IndexOutOfBoundsException, IOException {
         //todo your code here
-
+        if (newPos >= fileNode.getTotalSize()) {
+            return;
+        }
+        currentPos = newPos;
     }
 }

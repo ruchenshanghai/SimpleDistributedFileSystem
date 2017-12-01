@@ -28,7 +28,7 @@ public class BlockInfo implements Serializable {
     }
 
     public boolean writeToDataNodeOnce(byte[] data, int endPos) {
-        if (endPos > DataNode.BLOCK_SIZE) {
+        if (endPos > data.length || endPos > DataNode.BLOCK_SIZE) {
             return false;
         }
         DataNode dataNode = new DataNode();
@@ -45,12 +45,20 @@ public class BlockInfo implements Serializable {
         return true;
     }
 
-    public int readFromDataNodeOnce(byte[] target, int targetPos, int blockPos) {
-        if (targetPos >= target.length) {
+    public int readFromDataNodeOnce(byte[] target, int startPos, int endPos) {
+        if (endPos > target.length || endPos > DataNode.BLOCK_SIZE) {
             return 0;
         }
-
-
-        return 0;
+        DataNode dataNode = new DataNode();
+        int tempDataLength = endPos;
+        int randomIndex = (int) (Math.random() * DUPLICATE_NUM);
+        int tempBlockID = locatedBlocks.get(randomIndex).blockNumber;
+        try {
+            dataNode.read(tempBlockID, startPos, tempDataLength, target);
+            return tempDataLength;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 }

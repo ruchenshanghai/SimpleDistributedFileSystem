@@ -19,21 +19,28 @@ public class FileNode extends Entity implements Serializable {
 
     public FileNode(int id, String fileName) {
         super(id, TYPE.FILE, fileName);
-        System.out.println("initial file node name: " + this.name);
+        System.out.println("initial file node name: " + name);
     }
 
     public void addBlockInfo(BlockInfo newBlockInfo) {
-        this.blockInfos.add(newBlockInfo);
+        blockInfos.add(newBlockInfo);
     }
 
     public void addTotalSize(int addSize) {
         if (addSize > 0) {
-            this.totalSize += addSize;
+            totalSize += addSize;
         }
     }
 
     public int getBlockInfoLength() {
-        return this.blockInfos.size();
+        return blockInfos.size();
+    }
+
+    public BlockInfo getBlockInfoByIndex(int index) {
+        if (index >= blockInfos.size() || index < 0) {
+            return null;
+        }
+        return blockInfos.get(index);
     }
 
 //    // fill block write
@@ -62,20 +69,21 @@ public class FileNode extends Entity implements Serializable {
     public int getTotalSize() {
         return totalSize;
     }
-// read from block
-    public int readFromBlockInfos(byte[] target, int startPos) {
-        int blockInfoIndex = startPos / DataNode.BLOCK_SIZE;
-        int blockInfoPos = startPos % DataNode.BLOCK_SIZE;
-        int readCount = 0;
-//        while (readCount < target.length && blockInfoIndex < blockInfos.size()) {
-//            while (readCount < target.length && blockInfoPos < DataNode.BLOCK_SIZE) {
-//                target[readCount]
-//            }
-//        }
 
-
-        return 0;
-    }
+//// read from block
+//    public int readFromBlockInfos(byte[] target, int startPos) {
+//        int blockInfoIndex = startPos / DataNode.BLOCK_SIZE;
+//        int blockInfoPos = startPos % DataNode.BLOCK_SIZE;
+//        int readCount = 0;
+////        while (readCount < target.length && blockInfoIndex < blockInfos.size()) {
+////            while (readCount < target.length && blockInfoPos < DataNode.BLOCK_SIZE) {
+////                target[readCount]
+////            }
+////        }
+//
+//
+//        return 0;
+//    }
 
 }
 //class BlockInfo implements Serializable {

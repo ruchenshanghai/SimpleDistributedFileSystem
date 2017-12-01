@@ -33,13 +33,6 @@ public class DirNode extends Entity {
         }
     }
 
-
-
-    public DirNode(int id) throws IOException {
-        this.id = id;
-        this.type = TYPE.DIR;
-    }
-
     public DirNode(int id, String directoryName) throws IOException {
         super(id, TYPE.DIR, directoryName);
     }
