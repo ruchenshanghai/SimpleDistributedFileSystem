@@ -112,8 +112,10 @@ class SystemNode {
         try {
             File tempFile = new File(RELATIVE_PATH + "/" + this.ID + ".node");
             BufferedInputStream rootInputStream = new BufferedInputStream(new FileInputStream(tempFile));
+            int tempInt;
             byte tempByte;
-            while ((tempByte = (byte) rootInputStream.read()) != -1) {
+            while ((tempInt = rootInputStream.read()) != -1) {
+                tempByte = (byte) tempInt;
                 int nodeType = tempByte;
                 int tempNameLength = 0;
                 byte[] tempNameByteArray;
@@ -121,11 +123,20 @@ class SystemNode {
                 int tempNodeID = 0;
                 SystemNode tempNode = null;
 
-                tempByte = (byte) rootInputStream.read();
+                if ((tempInt = rootInputStream.read()) == -1) {
+                    return false;
+                }
+                tempByte = (byte) tempInt;
                 tempNameLength = ((tempByte << 16) & 0xff0000) | tempNameLength;
-                tempByte = (byte) rootInputStream.read();
+                if ((tempInt = rootInputStream.read()) == -1) {
+                    return false;
+                }
+                tempByte = (byte) tempInt;
                 tempNameLength = ((tempByte << 8) & 0xff00) | tempNameLength;
-                tempByte = (byte) rootInputStream.read();
+                if ((tempInt = rootInputStream.read()) == -1) {
+                    return false;
+                }
+                tempByte = (byte) tempInt;
                 tempNameLength = ((tempByte) & 0xff) | tempNameLength;
                 tempNameByteArray = new byte[tempNameLength];
 
@@ -136,13 +147,25 @@ class SystemNode {
                 tempNodeName = new String(tempNameByteArray);
                 System.out.println("read node name: " + tempNodeName);
 
-                tempByte = (byte) rootInputStream.read();
+                if ((tempInt = rootInputStream.read()) == -1) {
+                    return false;
+                }
+                tempByte = (byte) tempInt;
                 tempNodeID = ((tempByte << 24) & 0xff000000) | tempNodeID;
-                tempByte = (byte) rootInputStream.read();
+                if ((tempInt = rootInputStream.read()) == -1) {
+                    return false;
+                }
+                tempByte = (byte) tempInt;
                 tempNodeID = ((tempByte << 16) & 0xff0000) | tempNodeID;
-                tempByte = (byte) rootInputStream.read();
+                if ((tempInt = rootInputStream.read()) == -1) {
+                    return false;
+                }
+                tempByte = (byte) tempInt;
                 tempNodeID = ((tempByte << 8) & 0xff00) | tempNodeID;
-                tempByte = (byte) rootInputStream.read();
+                if ((tempInt = rootInputStream.read()) == -1) {
+                    return false;
+                }
+                tempByte = (byte) tempInt;
                 tempNodeID = ((tempByte) & 0xff) | tempNodeID;
 
                 switch (nodeType) {

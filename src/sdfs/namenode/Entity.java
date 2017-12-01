@@ -9,6 +9,9 @@ public class Entity {
 
     private static final int NOT_EXIST_ID = -1;
     // id: -1 for not save to disk
+    private static final int FILE_INT = 0;
+    private static final int DIRECTORY_INT = 1;
+
 
     protected int id;
     protected TYPE type;
@@ -26,6 +29,14 @@ public class Entity {
 
     public static int getNotExistId() {
         return NOT_EXIST_ID;
+    }
+
+    public static int getFileInt() {
+        return FILE_INT;
+    }
+
+    public static int getDirectoryInt() {
+        return DIRECTORY_INT;
     }
 
     public int getId() {

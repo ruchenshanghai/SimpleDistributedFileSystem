@@ -5,6 +5,7 @@
 package sdfs.utils;
 
 import sdfs.datanode.DataNode;
+import sdfs.namenode.BlockInfo;
 import sdfs.namenode.DirNode;
 import sdfs.namenode.FileNode;
 import sdfs.namenode.NameNode;
@@ -16,7 +17,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class SDFSOutputStream implements Closeable, Flushable {
-    private FileNode fileNode;
+    NameNode nameNode = null;
+    private FileNode fileNode = null;
+    private String fileUri = null;
     int bufferSize = DataNode.BLOCK_SIZE;
     int currentBufferPos = 0;
     byte[] buffer = new byte[bufferSize];
@@ -24,11 +27,12 @@ public class SDFSOutputStream implements Closeable, Flushable {
 
 
     public SDFSOutputStream(String fileUri) throws Exception {
-        NameNode nameNode = NameNode.getSingleNameNodeInstance();
+        nameNode = NameNode.getSingleNameNodeInstance();
         fileNode = nameNode.create(fileUri);
         if (fileNode == null) {
             throw new Exception();
         }
+        this.fileUri = fileUri;
     }
 
     public void write(byte[] b) throws IOException {
@@ -61,8 +65,12 @@ public class SDFSOutputStream implements Closeable, Flushable {
     public void flush() throws IOException {
         //todo your code here
         if (currentBufferPos == bufferSize) {
-            boolean writeRes = fileNode.writeToBlockInfosOnce(buffer, currentBufferPos);
+            BlockInfo newBlockInfo = nameNode.addBlockInfo(this.fileUri);
+            boolean writeRes = newBlockInfo.writeToDataNodeOnce(buffer, currentBufferPos);
             System.out.println("write result: " + writeRes);
+            if (writeRes) {
+                this.fileNode.addTotalSize(bufferSize);
+            }
             currentBufferPos = 0;
         }
     }
@@ -72,14 +80,17 @@ public class SDFSOutputStream implements Closeable, Flushable {
         //todo your code here
         if (currentBufferPos > 0 && currentBufferPos <= bufferSize) {
             // write to disk and close file node
-            boolean writeRes = fileNode.writeToBlockInfosOnce(buffer, currentBufferPos);
+            BlockInfo newBlockInfo = nameNode.addBlockInfo(this.fileUri);
+            boolean writeRes = newBlockInfo.writeToDataNodeOnce(buffer, currentBufferPos);
             System.out.println("write result: " + writeRes);
+            if (writeRes) {
+                this.fileNode.addTotalSize(currentBufferPos);
+            }
             currentBufferPos = 0;
         }
 
-        NameNode nameNode = NameNode.getSingleNameNodeInstance();
         try {
-            nameNode.closeFileNode(fileNode);
+            nameNode.close(this.fileUri);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("file node save error");

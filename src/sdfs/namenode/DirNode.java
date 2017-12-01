@@ -52,8 +52,10 @@ public class DirNode extends Entity {
             File dirFile = new File(RELATIVE_PATH + "/" + this.id + ".node");
             BufferedInputStream dirInputStream = new BufferedInputStream(new FileInputStream(dirFile));
 
+            int tempInt;
             byte tempByte;
-            while ((tempByte = (byte) dirInputStream.read()) != -1) {
+            while ((tempInt = dirInputStream.read()) != -1) {
+                tempByte = (byte) tempInt;
                 int nodeType = tempByte;
                 int nodeNameLength = 0;
                 byte[] nameByteArray;
@@ -61,11 +63,20 @@ public class DirNode extends Entity {
                 int nodeID = 0;
                 Entity nodeEntity = null;
 
-                tempByte = (byte) dirInputStream.read();
+                if ((tempInt = dirInputStream.read()) == -1) {
+                    throw new IOException();
+                }
+                tempByte = (byte) tempInt;
                 nodeNameLength = ((tempByte << 16) & 0xff0000) | nodeNameLength;
-                tempByte = (byte) dirInputStream.read();
+                if ((tempInt = dirInputStream.read()) == -1) {
+                    throw new IOException();
+                }
+                tempByte = (byte) tempInt;
                 nodeNameLength = ((tempByte << 8) & 0xff00) | nodeNameLength;
-                tempByte = (byte) dirInputStream.read();
+                if ((tempInt = dirInputStream.read()) == -1) {
+                    throw new IOException();
+                }
+                tempByte = (byte) tempInt;
                 nodeNameLength = ((tempByte) & 0xff) | nodeNameLength;
                 nameByteArray = new byte[nodeNameLength];
 
@@ -76,13 +87,25 @@ public class DirNode extends Entity {
                 nodeName = new String(nameByteArray);
                 System.out.println("read node name: " + nodeName);
 
-                tempByte = (byte) dirInputStream.read();
+                if ((tempInt = dirInputStream.read()) == -1) {
+                    throw new IOException();
+                }
+                tempByte = (byte) tempInt;
                 nodeID = ((tempByte << 24) & 0xff000000) | nodeID;
-                tempByte = (byte) dirInputStream.read();
+                if ((tempInt = dirInputStream.read()) == -1) {
+                    throw new IOException();
+                }
+                tempByte = (byte) tempInt;
                 nodeID = ((tempByte << 16) & 0xff0000) | nodeID;
-                tempByte = (byte) dirInputStream.read();
+                if ((tempInt = dirInputStream.read()) == -1) {
+                    throw new IOException();
+                }
+                tempByte = (byte) tempInt;
                 nodeID = ((tempByte << 8) & 0xff00) | nodeID;
-                tempByte = (byte) dirInputStream.read();
+                if ((tempInt = dirInputStream.read()) == -1) {
+                    throw new IOException();
+                }
+                tempByte = (byte) tempInt;
                 nodeID = ((tempByte) & 0xff) | nodeID;
 
                 switch (nodeType) {
@@ -108,7 +131,7 @@ public class DirNode extends Entity {
         Iterator<Entity> contentIter = contents.iterator();
         while (contentIter.hasNext()) {
             Entity tempEntity = contentIter.next();
-            if (tempEntity.name.equals(directoryName)) {
+            if (tempEntity.type == TYPE.DIR && tempEntity.name.equals(directoryName)) {
                 return true;
             }
         }
@@ -119,7 +142,7 @@ public class DirNode extends Entity {
         Iterator<Entity> contentIter = contents.iterator();
         while (contentIter.hasNext()) {
             Entity tempEntity = contentIter.next();
-            if (tempEntity.name.equals(fileName)) {
+            if (tempEntity.type == TYPE.FILE && tempEntity.name.equals(fileName)) {
                 return true;
             }
         }
@@ -130,7 +153,7 @@ public class DirNode extends Entity {
         return RELATIVE_PATH;
     }
 
-    public static int currentNodeIndex() {
+    public static int generateNodeIndex() {
         File tempDirectory = new File(RELATIVE_PATH);
         return tempDirectory.list().length;
     }
@@ -162,38 +185,13 @@ public class DirNode extends Entity {
         return new String[]{newDirectoryName, String.valueOf(dirNode.getId())};
     }
 
-    public DirNode checkOutDir(String directoryName) throws IOException {
+
+    private DirNode checkOutDir(String directoryName) throws IOException {
         Iterator<Entity> contentIter = contents.iterator();
         while (contentIter.hasNext()) {
             Entity tempEntry = contentIter.next();
             if (tempEntry.type == TYPE.DIR && tempEntry.name.equals(directoryName)) {
                 return new DirNode(tempEntry.id, tempEntry.name);
-            }
-        }
-        return null;
-    }
-
-    public FileNode checkOutFile(String fileName) {
-        Iterator<Entity> contentIter = contents.iterator();
-        while (contentIter.hasNext()) {
-            Entity tempEntry = contentIter.next();
-            if (tempEntry.type == TYPE.FILE && tempEntry.name.equals(fileName)) {
-                File tempFile = new File(RELATIVE_PATH + "/" + tempEntry.id + ".node");
-                if (!tempFile.isFile()) {
-                    return null;
-                }
-                try {
-                    FileInputStream tempIn = new FileInputStream(tempFile);
-                    ObjectInputStream objIn = new ObjectInputStream(tempIn);
-                    FileNode tempFileNode = (FileNode) objIn.readObject();
-                    tempFileNode.setId(tempEntry.id);
-                    tempFileNode.setName(tempEntry.name);
-                    tempFileNode.setType(TYPE.FILE);
-                    return tempFileNode;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
             }
         }
         return null;

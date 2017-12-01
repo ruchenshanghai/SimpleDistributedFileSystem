@@ -4,6 +4,7 @@
 
 package sdfs.utils;
 
+import sdfs.datanode.DataNode;
 import sdfs.namenode.FileNode;
 import sdfs.namenode.NameNode;
 
@@ -28,6 +29,22 @@ public class SDFSInputStream implements Closeable {
         //todo your code here
         if (currentPos >= fileNode.getTotalSize()) {
             throw new IOException();
+        }
+        int leftBlockSize = fileNode.getTotalSize();
+        int leftArraySize = b.length;
+        int blockInfoIndex = 0;
+        int blockInfoLength = fileNode.getBlockInfoLength();
+        while (leftArraySize > 0 && leftBlockSize > 0 && blockInfoIndex < blockInfoLength) {
+            byte[] tempData;
+            if (leftBlockSize >= DataNode.BLOCK_SIZE && leftArraySize >= DataNode.BLOCK_SIZE) {
+                tempData = new byte[DataNode.BLOCK_SIZE];
+
+            }
+        }
+        for (int dataIndex = 0; dataIndex < b.length && leftBlockSize > 0; dataIndex++) {
+            if (leftBlockSize >= DataNode.BLOCK_SIZE && leftArraySize >= DataNode.BLOCK_SIZE) {
+
+            }
         }
 
 
