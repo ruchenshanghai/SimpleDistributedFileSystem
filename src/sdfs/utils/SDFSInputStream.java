@@ -26,10 +26,10 @@ public class SDFSInputStream implements Closeable {
     }
 
 
-    public int read(byte[] b) throws IOException {
+    public int read(byte[] b) {
         //todo your code here
         if (currentPos >= fileNode.getTotalSize()) {
-            throw new IOException();
+            return 0;
         }
         int leftBlockSize = fileNode.getTotalSize();
         int readCount = 0;

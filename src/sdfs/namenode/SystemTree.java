@@ -29,19 +29,6 @@ public class SystemTree {
         return systemTree;
     }
 
-//    public String parseFileUriOut(String fileUri) {
-//        String[] pathArray = fileUri.split("/");
-//        SystemNode tempNode = rootDirNode;
-//        for (int i = 0; i < pathArray.length - 1; i++) {
-//            tempNode = tempNode.checkOutChild(pathArray[i]);
-//            if (tempNode == null) {
-//                System.out.println("open file error");
-//                return null;
-//            }
-//        }
-//        return pathArray[pathArray.length - 1];
-//    }
-
     public boolean mkdir(String fileUri, int tempID) {
         String[] pathArray = fileUri.split("/");
         SystemNode tempDirNode = rootDirNode;
@@ -103,13 +90,6 @@ public class SystemTree {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            SystemNode systemNode = new SystemNode(0, "", SystemNode.TYPE.DIR);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }
 
 class SystemNode {
