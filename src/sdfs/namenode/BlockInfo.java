@@ -12,7 +12,7 @@ import java.util.List;
 public class BlockInfo implements Serializable {
     private static final long serialVersionUID = 8712105981933359634L;
     private final List<LocatedBlock> locatedBlocks = new ArrayList<>();
-    private static final int DUPLICATE_NUM = 2;
+    private static final int DUPLICATE_NUM = 1;
     private static final String LOCALHOST_NAME = "localhost";
 
     public BlockInfo() throws IOException {
@@ -32,11 +32,10 @@ public class BlockInfo implements Serializable {
             return false;
         }
         DataNode dataNode = new DataNode();
-        int tempDataLength = endPos;
         for (int i = 0; i < locatedBlocks.size(); i++) {
             int tempBlockID = locatedBlocks.get(i).blockNumber;
             try {
-                dataNode.write(tempBlockID, 0, tempDataLength, data);
+                dataNode.write(tempBlockID, 0, endPos, data);
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
@@ -50,12 +49,11 @@ public class BlockInfo implements Serializable {
             return 0;
         }
         DataNode dataNode = new DataNode();
-        int tempDataLength = endPos;
         int randomIndex = (int) (Math.random() * DUPLICATE_NUM);
         int tempBlockID = locatedBlocks.get(randomIndex).blockNumber;
         try {
-            dataNode.read(tempBlockID, startPos, tempDataLength, target);
-            return tempDataLength;
+            dataNode.read(tempBlockID, startPos, endPos, target);
+            return endPos;
         } catch (IOException e) {
             e.printStackTrace();
             return 0;

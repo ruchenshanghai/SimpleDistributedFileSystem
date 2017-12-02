@@ -11,7 +11,6 @@ import sdfs.namenode.NameNode;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 public class SDFSInputStream implements Closeable {
     private FileNode fileNode;
@@ -31,14 +30,14 @@ public class SDFSInputStream implements Closeable {
         if (currentPos >= fileNode.getTotalSize()) {
             return 0;
         }
-        int leftBlockSize = fileNode.getTotalSize();
         int readCount = 0;
         int targetLength = b.length;
 
-        int blockInfoIndex = 0;
-        int blockInfoOffset = 0;
+        int blockInfoIndex;
+        int blockInfoOffset;
         int blockInfoLength = fileNode.getBlockInfoLength();
         // initial by currentPos
+        int leftBlockSize = fileNode.getTotalSize() - currentPos;
         blockInfoIndex = currentPos / DataNode.BLOCK_SIZE;
         blockInfoOffset = currentPos % DataNode.BLOCK_SIZE;
 
